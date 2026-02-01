@@ -47,4 +47,15 @@ public class ProjectController {
         return ResponseEntity.ok("User added");
     }
 
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectDto> getProject(
+            @PathVariable Long projectId,
+            Authentication auth) {
+
+        Long userId = Long.parseLong(auth.getName());
+        return ResponseEntity.ok(
+                projectService.getProject(projectId, userId)
+        );
+    }
+
 }

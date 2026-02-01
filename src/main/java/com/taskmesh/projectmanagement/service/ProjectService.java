@@ -84,5 +84,23 @@ public class ProjectService {
         producer.userAssigned(projectId, request.getUserId());
     }
 
+    @Cacheable(value = "projects", key = "#projectId")
+    public ProjectDto getProject(Long projectId, Long userId) {
+
+        if (!memberRepo.existsByProjectIdAndUserId(projectId, userId))
+            throw new RuntimeException("Access denied");
+
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow();
+
+        List<ProjectMember> members =
+                memberRepo.findByProjectId(projectId);
+
+        ProjectDto response = new ProjectDto();
+        response.setProject(project);
+        response.setMembers(members);
+
+        return response;
+    }
 
 }
