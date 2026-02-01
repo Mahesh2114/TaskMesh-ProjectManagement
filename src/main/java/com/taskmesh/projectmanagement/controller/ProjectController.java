@@ -1,6 +1,8 @@
 package com.taskmesh.projectmanagement.controller;
 
+import com.taskmesh.projectmanagement.dto.AddMember;
 import com.taskmesh.projectmanagement.dto.CreateProject;
+import com.taskmesh.projectmanagement.dto.ProjectDto;
 import com.taskmesh.projectmanagement.entity.Project;
 import com.taskmesh.projectmanagement.service.ProjectService;
 
@@ -31,6 +33,18 @@ public class ProjectController {
         return ResponseEntity.ok(
                 projectService.createProject(request, ownerId, token)
         );
+    }
+
+    @PostMapping("/{projectId}/members")
+    public ResponseEntity<?> addMember(
+            @PathVariable Long projectId,
+            @RequestBody AddMember request,
+            @RequestHeader("Authorization") String token,
+            Authentication auth) {
+
+        Long ownerId = Long.parseLong(auth.getName());
+        projectService.addMember(projectId, ownerId, request, token);
+        return ResponseEntity.ok("User added");
     }
 
 }
