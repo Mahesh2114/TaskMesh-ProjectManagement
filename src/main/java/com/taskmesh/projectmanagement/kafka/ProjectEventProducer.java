@@ -13,11 +13,21 @@ public class ProjectEventProducer {
     }
 
     public void projectCreated(Long projectId) {
-        kafkaTemplate.send("PROJECT_CREATED", projectId.toString());
+        try {
+            kafkaTemplate.send("PROJECT_CREATED", projectId.toString());
+        } catch (Exception e) {
+            System.out.println("Kafka down, skipping PROJECT_CREATED event");
+        }
     }
 
     public void userAssigned(Long projectId, Long userId) {
-        kafkaTemplate.send("USER_ASSIGNED_TO_PROJECT",
-                projectId + ":" + userId);
+        try {
+            kafkaTemplate.send(
+                    "USER_ASSIGNED_TO_PROJECT",
+                    projectId + ":" + userId
+            );
+        } catch (Exception e) {
+            System.out.println("Kafka down, skipping USER_ASSIGNED_TO_PROJECT event");
+        }
     }
 }

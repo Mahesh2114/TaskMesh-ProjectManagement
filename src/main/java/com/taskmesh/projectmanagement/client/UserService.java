@@ -14,27 +14,22 @@ public class UserService {
 
     private final RestTemplate restTemplate;
 
-    public UserService (RestTemplate restTemplate) {
+    public UserService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     public void validateActiveUser(Long userId, String token) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", token);
+        headers.set("Authorization", token); // 🔥 FORWARD JWT
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response =
-                restTemplate.exchange(
-                        "http://localhost:8080/users/" + userId,
-                        HttpMethod.GET,
-                        entity,
-                        Map.class
-                );
-
-        if (!"ACTIVE".equals(response.getBody().get("status"))) {
-            throw new RuntimeException("User not active");
-        }
+        restTemplate.exchange(
+                "http://localhost:8080/users/" + userId,
+                HttpMethod.GET,
+                entity,
+                Void.class
+        );
     }
 }

@@ -58,4 +58,26 @@ public class ProjectController {
         );
     }
 
+    @GetMapping("/{projectId}/verify-manager")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> verifyManager(
+            @PathVariable Long projectId,
+            Authentication auth) {
+
+        Long userId = Long.parseLong(auth.getName());
+
+        projectService.verifyManager(projectId, userId);
+
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<Void> verifyMember(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            Authentication auth) {
+
+        Long callerId = Long.parseLong(auth.getName());
+        projectService.verifyMember(projectId, userId, callerId);
+        return ResponseEntity.ok().build();
+    }
 }

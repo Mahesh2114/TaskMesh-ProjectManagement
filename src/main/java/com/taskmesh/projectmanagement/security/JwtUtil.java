@@ -12,13 +12,15 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "tasknexus-secret-key-tasknexus-secret-key";
+    private static final String SECRET =
+            "tasknexus-secret-key-tasknexus-secret-key";
 
-    private static Key getSigningKey() {
+    private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static Claims extractClaims(String token) {
+    // 🔒 INTERNAL USE ONLY
+    private Claims extractClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -26,12 +28,12 @@ public class JwtUtil {
                 .getBody();
     }
 
+    // ✅ PUBLIC METHODS
+    public Long extractUserId(String token) {
+        return Long.parseLong(extractClaims(token).getSubject());
+    }
+
     public String extractRole(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
+        return extractClaims(token).get("role", String.class);
     }
 }

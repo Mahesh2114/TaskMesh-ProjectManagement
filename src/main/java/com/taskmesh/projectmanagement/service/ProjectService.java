@@ -12,6 +12,7 @@ import com.taskmesh.projectmanagement.kafka.ProjectEventProducer;
 import com.taskmesh.projectmanagement.repo.ProjectMemberRepo;
 import com.taskmesh.projectmanagement.repo.ProjectRepo;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -103,4 +104,37 @@ public class ProjectService {
         return response;
     }
 
+    public void verifyManager(Long projectId, Long userId) {
+
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwnerId().equals(userId)) {
+            throw new AccessDeniedException("Not project manager");
+        }
+    }
+
+    public void verifyMember(Long projectId, Long userId, Long callerId) {
+
+        // Project must exist
+        projectRepo.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // Assigned user must be member
+        if (!memberRepo.existsByProjectIdAndUserId(projectId, userId)) {
+            throw new AccessDeniedException("Assigned user is not a project member");
+        }
+
+        // Caller must be owner or member
+        boolean callerAllowed =
+                projectRepo.findById(projectId)
+                        .get()
+                        .getOwnerId().equals(callerId)
+                        ||
+                        memberRepo.existsByProjectIdAndUserId(projectId, callerId);
+
+        if (!callerAllowed) {
+            throw new AccessDeniedException("Caller not authorized");
+        }
+    }
 }
